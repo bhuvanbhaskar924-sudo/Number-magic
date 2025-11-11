@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Magic</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000">
+  <style>
+    body{margin:0;background:#000;color:#fff;font-family:system-ui;display:flex;justify-content:center;align-items:center;height:100vh;}
+    .stage{width:100vw;height:100vh;overflow:hidden;touch-action:pan-y;}
+    .track{display:flex;height:100%;transition:transform .25s;}
+    .card{flex:0 0 100%;display:flex;justify-content:center;align-items:center;}
+    .panel{background:#111;padding:20px;border-radius:20px;box-shadow:0 0 20px #000;}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;font-size:20px;}
+  </style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <div class="track" id="track"></div>
+  </div>
+<script>
+const masks=[1,2,4,8,16];
+const track=document.getElementById("track");
+masks.forEach(m=>{
+ let nums=[...Array(31).keys()].slice(1).filter(n=>(n&m)==m);
+ let card=document.createElement("div");
+ card.className="card";
+ card.innerHTML=`<div class="panel"><div class="grid">${nums.map(n=>`<div>${n}</div>`).join("")}</div></div>`;
+ track.append(card);
+});
+let i=0,start=0,current=0,dragging=false;
+function w(){return document.body.clientWidth;}
+function move(off=0){track.style.transform=`translateX(${(-i*w()+off)}px)`;}
+track.addEventListener("touchstart",e=>{dragging=true;start=e.touches[0].clientX;});
+track.addEventListener("touchmove",e=>{current=e.touches[0].clientX;move(current-start);});
+function end(){if(Math.abs(current-start)>w()*0.2){i=Math.max(0,Math.min(i+(current<start?1:-1),masks.length-1));}dragging=false;move();}
+track.addEventListener("touchend",end);
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js");}
+</script>
+</body>
+</html>
